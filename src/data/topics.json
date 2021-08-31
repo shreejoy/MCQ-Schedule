@@ -1,0 +1,159 @@
+[
+    {
+        "name": "Database Management System",
+        "code": "DBMS",
+        "slots": 7,
+        "coverage": [
+            "SA",
+            "SM",
+            "OM",
+            "SS",
+            "SD",
+            "PB",
+            "AS"
+        ],
+        "ignore": []
+    },
+    {
+        "name": "Object Oriented Programming",
+        "code": "OOPS",
+        "slots": 2,
+        "coverage": [
+            "OM",
+            "SA",
+            "SS",
+            "SR"
+        ],
+        "ignore": []
+    },
+    {
+        "name": "Data Structure and Algorithms",
+        "code": "DSA",
+        "slots": 2,
+        "coverage": [
+            "SA",
+            "PB",
+            "AS",
+            "OM"
+        ],
+        "ignore": []
+    },
+    {
+        "name": "Apptitude",
+        "code": "APPT",
+        "slots": 2,
+        "coverage": [
+            "SR",
+            "NP",
+            "SM",
+            "SA"
+        ],
+        "ignore": []
+    },
+    {
+        "name": "C Programming",
+        "code": "C",
+        "slots": 1,
+        "ignore": [
+            "SS",
+            "SR",
+            "OM"
+        ],
+        "coverage": [
+            "PB",
+            "SM",
+            "SD",
+            "AS",
+            "NP"
+        ]
+    },
+    {
+        "name": "App Development",
+        "code": "APP",
+        "slots": 1,
+        "ignore": [
+            "NP",
+            "OM"
+        ],
+        "coverage": [
+            "SS",
+            "SA",
+            "AS",
+            "SM",
+            "SD"
+        ]
+    },
+    {
+        "name": "Web Development",
+        "code": "WEB",
+        "slots": 1,
+        "ignore": [
+            "SS"
+        ],
+        "coverage": [
+            "OM",
+            "SR",
+            "SA",
+            "NP",
+            "SD",
+            "PB"
+        ]
+    },
+    {
+        "name": "Java Programming",
+        "code": "JAVA",
+        "slots": 1,
+        "coverage": [
+            "OM",
+            "SR",
+            "SA",
+            "SS",
+            "NP"
+        ],
+        "ignore": []
+    },
+    {
+        "name": "Python Programming",
+        "code": "PYTHON",
+        "slots": 1,
+        "coverage": [
+            "OM",
+            "SS",
+            "AS",
+            "SM",
+            "SR"
+        ],
+        "ignore": []
+    },
+    {
+        "name": "Computer Networking",
+        "code": "NET",
+        "slots": 1,
+        "coverage": [
+            "SR",
+            "SS"
+        ],
+        "ignore": []
+    },
+    {
+        "name": "DevOps",
+        "code": "DEVOPS",
+        "slots": 1,
+        "coverage": [
+            "SS",
+            "OM",
+            "SR"
+        ],
+        "ignore": []
+    },
+    {
+        "name": "Psudo Code",
+        "code": "PSUDO",
+        "slots": 1,
+        "coverage": [
+            "SS",
+            "OM"
+        ],
+        "ignore": []
+    }
+]

@@ -1,0 +1,25 @@
+name: Generate
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '30 21 * * SUN'
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: fregante/setup-git-user@v1
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Generate
+      run: |
+        log=$(mktemp)
+        while true; do timeout 2 python3 scripts/generate*.py > $log; [[ $? -eq 0 ]] && break; done
+        git add src/data && git commit -m "Generate: $(date)" -m "$(echo -e "Updated timetable:\n$(cat $log)")" && git push
