@@ -1,54 +1,54 @@
 {
     "MON": {
         "S1": {
-            "topic": "DEVOPS",
-            "assignee": "SS"
-        },
-        "S2": {
-            "topic": "OOPS",
-            "assignee": "PB"
-        },
-        "S3": {
-            "topic": "DBMS",
-            "assignee": "OM"
-        }
-    },
-    "TUE": {
-        "S1": {
-            "topic": "WEB",
-            "assignee": "SR"
-        },
-        "S2": {
             "topic": "DSA",
-            "assignee": "SA"
+            "assignee": "AS"
+        },
+        "S2": {
+            "topic": "WEB",
+            "assignee": "PB"
         },
         "S3": {
             "topic": "DBMS",
             "assignee": "SD"
         }
     },
-    "WED": {
+    "TUE": {
         "S1": {
-            "topic": "C",
-            "assignee": "AS"
+            "topic": "DEVOPS",
+            "assignee": "SR"
         },
         "S2": {
-            "topic": "APPT",
-            "assignee": "SM"
+            "topic": "OOPS",
+            "assignee": "OM"
         },
         "S3": {
             "topic": "DBMS",
+            "assignee": "NP"
+        }
+    },
+    "WED": {
+        "S1": {
+            "topic": "NET",
+            "assignee": "SS"
+        },
+        "S2": {
+            "topic": "OOPS",
             "assignee": "SA"
+        },
+        "S3": {
+            "topic": "DBMS",
+            "assignee": "SR"
         }
     },
     "THU": {
         "S1": {
-            "topic": "OOPS",
-            "assignee": "NP"
+            "topic": "PSUDO",
+            "assignee": "SR"
         },
         "S2": {
-            "topic": "NET",
-            "assignee": "OM"
+            "topic": "C",
+            "assignee": "NP"
         },
         "S3": {
             "topic": "DBMS",
@@ -57,12 +57,12 @@
     },
     "FRI": {
         "S1": {
-            "topic": "PYTHON",
-            "assignee": "OM"
+            "topic": "APP",
+            "assignee": "SM"
         },
         "S2": {
-            "topic": "APP",
-            "assignee": "SR"
+            "topic": "JAVA",
+            "assignee": "PB"
         },
         "S3": {
             "topic": "DBMS",
@@ -71,30 +71,30 @@
     },
     "SAT": {
         "S1": {
-            "topic": "JAVA",
-            "assignee": "SR"
+            "topic": "DSA",
+            "assignee": "OM"
         },
         "S2": {
             "topic": "APPT",
-            "assignee": "NP"
-        },
-        "S3": {
-            "topic": "DBMS",
-            "assignee": "PB"
-        }
-    },
-    "SUN": {
-        "S1": {
-            "topic": "PSUDO",
-            "assignee": "SS"
-        },
-        "S2": {
-            "topic": "DSA",
-            "assignee": "SD"
+            "assignee": "SA"
         },
         "S3": {
             "topic": "DBMS",
             "assignee": "AS"
+        }
+    },
+    "SUN": {
+        "S1": {
+            "topic": "APPT",
+            "assignee": "SD"
+        },
+        "S2": {
+            "topic": "PYTHON",
+            "assignee": "SS"
+        },
+        "S3": {
+            "topic": "DBMS",
+            "assignee": "OM"
         }
     }
 }
