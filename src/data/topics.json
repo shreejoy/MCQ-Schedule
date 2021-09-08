@@ -4,13 +4,13 @@
         "code": "DBMS",
         "slots": 7,
         "coverage": [
-            "AS",
-            "SR",
-            "PB",
-            "NP",
-            "SA",
+            "OM",
+            "SD",
             "SM",
-            "SS"
+            "SA",
+            "SS",
+            "AS",
+            "PB"
         ],
         "ignore": []
     },
@@ -22,7 +22,9 @@
             "SD",
             "AS",
             "SR",
-            "SM"
+            "SM",
+            "PB",
+            "NP"
         ],
         "ignore": []
     },
@@ -34,7 +36,9 @@
             "SM",
             "NP",
             "SR",
-            "SS"
+            "SS",
+            "SA",
+            "SD"
         ],
         "ignore": []
     },
@@ -46,7 +50,9 @@
             "SS",
             "SR",
             "OM",
-            "AS"
+            "AS",
+            "SM",
+            "NP"
         ],
         "ignore": []
     },
@@ -62,7 +68,8 @@
         "coverage": [
             "SA",
             "PB",
-            "SD"
+            "SD",
+            "AS"
         ]
     },
     {
@@ -76,7 +83,8 @@
         "coverage": [
             "SA",
             "SS",
-            "PB"
+            "PB",
+            "SR"
         ]
     },
     {
@@ -89,7 +97,8 @@
         "coverage": [
             "OM",
             "AS",
-            "SA"
+            "SA",
+            "SR"
         ]
     },
     {
@@ -99,7 +108,8 @@
         "coverage": [
             "SS",
             "OM",
-            "NP"
+            "NP",
+            "SR"
         ],
         "ignore": []
     },
@@ -108,10 +118,7 @@
         "code": "PYTHON",
         "slots": 1,
         "coverage": [
-            "OM",
-            "SS",
-            "SA",
-            "SD"
+            "OM"
         ],
         "ignore": []
     },
@@ -120,9 +127,7 @@
         "code": "NET",
         "slots": 1,
         "coverage": [
-            "SR",
-            "OM",
-            "SS"
+            "OM"
         ],
         "ignore": []
     },
@@ -131,7 +136,8 @@
         "code": "DEVOPS",
         "slots": 1,
         "coverage": [
-            "OM"
+            "OM",
+            "SS"
         ],
         "ignore": []
     },
@@ -141,7 +147,8 @@
         "slots": 1,
         "coverage": [
             "SR",
-            "OM"
+            "OM",
+            "SS"
         ],
         "ignore": []
     }
