@@ -12,8 +12,8 @@ function App() {
     <div>
       <h1>MCQ Schedule for AUG 30 2021 to SEPT 12 2021</h1>
       <hr />
-      <h3>Moderator of the week: Suman More (SM)</h3>
-      <h1>Schedule</h1>
+      <h3 id="moderator">Moderator of the week: Suman More (SM)</h3>
+      <h1 id="timetable">Schedule</h1>
       <table>
         <thead>
           <tr>
@@ -68,13 +68,19 @@ function App() {
           </tr>
         </tbody>
       </table>
-      <h1>Contributors</h1>
+      <h1 id="topics">Topics</h1>
+      <ul>
+        {topics.map(topic => (
+          <li key={topics.code}>{topics.name}</li>
+        ))}
+      </ul>
+      <h1 id="contributors">Contributors</h1>
       <ul>
         {contributors.map(contributor => (
           <li key={contributor.code}>{contributor.name} ({contributor.code})</li>
         ))}
       </ul>
-      <h1>Slots</h1>
+      <h1 id="slots">Slots</h1>
       <ul>
         <li>SLOT 1 (6AM - 11AM)</li>
         <li>SLOT 2 (12PM - 5PM)</li>
