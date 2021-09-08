@@ -6,7 +6,7 @@ __slots = _slots = ['S1', 'S2', 'S3']
 # List of days
 _days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 
-al_slots_count = len(_slots) * len(_days)
+all_slots_count = len(_slots) * len(_days)
 
 # topic lists
 topics = sorted(json.loads(open('src/data/topics.json').read()), key=lambda k: (-k['slots'], -len(k['ignore'])))
