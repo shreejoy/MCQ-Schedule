@@ -57,7 +57,7 @@ for index, topic in enumerate(topics):
             contributor = random.choice(_contributors)
 
         assigned = any(_slot for _slot in _slots if timetable[day][_slot]['assignee'] == contributor)
-        selected = any(_slot for _slot in _slots if timetable[day][_slot]['topic'] == topic['name'])
+        selected = any(_slot for _slot in _slots if timetable[day][_slot]['topic'] == topic['code'])
 
         if timetable[day][slot]['topic'] == '' and not assigned and not selected:
             if priority:
