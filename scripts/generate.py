@@ -51,7 +51,7 @@ for index, topic in enumerate(topics):
     # set topic to random day and slot
     while topic_slots > 0:
         day = random.choice(_days)
-        slot = _slot if _slot: else random.choice(_slots)
+        slot = _slot if _slot else random.choice(_slots)
 
         if len(priority_contributors) > 0:
             priority = True
