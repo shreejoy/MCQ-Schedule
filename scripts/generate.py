@@ -37,17 +37,21 @@ for index, topic in enumerate(topics):
         # list of available contributors
         _contributors.append(contributor['code'])
         
+    # if slot count is 7 then assume it as weekly quiz, hence push the topic to last slot.
+    _slot = None if topic_slots != 7 else 'S3'
+    
     # if sufficient contributors are not available then reset coverage but priortise the remaining first
     if topic_slots > len(_contributors):
         topics[index]['coverage'] = list()
         priority_contributors = _contributors
         _contributors = [contributor['code']  for contributor in contributors
                          if contributor['code'] not in topic['ignore'] and contributors_slot[contributor['code']] != 0]
+    
 
     # set topic to random day and slot
     while topic_slots > 0:
         day = random.choice(_days)
-        slot = random.choice(_slots)
+        slot = _slot if _slot: else random.choice(_slots)
 
         if len(priority_contributors) > 0:
             priority = True
