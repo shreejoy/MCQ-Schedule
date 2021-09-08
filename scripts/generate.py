@@ -2,9 +2,11 @@ import json
 import random
 
 # List of slots
-_slots = ['S1', 'S2', 'S3']
+__slots = _slots = ['S1', 'S2', 'S3']
 # List of days
 _days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
+
+al_slots_count = len(_slots) * len(_days)
 
 # topic lists
 topics = sorted(json.loads(open('src/data/topics.json').read()), key=lambda k: (-k['slots'], -len(k['ignore'])))
@@ -38,7 +40,7 @@ for index, topic in enumerate(topics):
         _contributors.append(contributor['code'])
         
     # if slot count is 7 then assume it as weekly quiz, hence push the topic to last slot.
-    _slot = None if topic_slots != 7 else 'S3'
+    _slot = None if topic_slots != 7 else __slots.pop()
     
     # if sufficient contributors are not available then reset coverage but priortise the remaining first
     if topic_slots > len(_contributors):
@@ -49,7 +51,7 @@ for index, topic in enumerate(topics):
     
 
     # set topic to random day and slot
-    while topic_slots > 0:
+    while topic_slots > 0 and all_slots_count > 0:
         day = random.choice(_days)
         slot = _slot if _slot else random.choice(_slots)
 
@@ -71,6 +73,7 @@ for index, topic in enumerate(topics):
                 _contributors.remove(contributor)
 
             topic_slots -= 1
+            all_slots_count -= 1
             contributors_slot[contributor] -= 1
             topics[index]['coverage'].append(contributor)
             timetable[day][slot]['topic'] = topic['code']
