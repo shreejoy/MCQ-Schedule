@@ -71,7 +71,7 @@ function App() {
       <h1 id="topics">Topics</h1>
       <ul>
         {topics.map(topic => (
-          <li key={topics.code}>{topics.name}</li>
+          <li key={topic.code}>{topic.name}</li>
         ))}
       </ul>
       <h1 id="contributors">Contributors</h1>
