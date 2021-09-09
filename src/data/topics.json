@@ -4,13 +4,13 @@
         "code": "DBMS",
         "slots": 7,
         "coverage": [
-            "NP",
+            "SM",
+            "SD",
             "AS",
             "PB",
-            "OM",
+            "NP",
             "SS",
-            "SA",
-            "SR"
+            "OM"
         ],
         "ignore": []
     },
@@ -24,7 +24,9 @@
             "AS",
             "SR",
             "SA",
-            "SM"
+            "SM",
+            "NP",
+            "PB"
         ],
         "ignore": []
     },
@@ -38,7 +40,9 @@
             "SR",
             "SS",
             "SD",
-            "AS"
+            "AS",
+            "OM",
+            "SA"
         ],
         "ignore": []
     },
@@ -52,7 +56,9 @@
             "PB",
             "AS",
             "NP",
-            "SR"
+            "SR",
+            "SS",
+            "SD"
         ],
         "ignore": []
     },
@@ -68,7 +74,8 @@
         "coverage": [
             "NP",
             "SA",
-            "SM"
+            "SM",
+            "AS"
         ]
     },
     {
@@ -81,7 +88,8 @@
         ],
         "coverage": [
             "SM",
-            "SS"
+            "SS",
+            "SR"
         ]
     },
     {
@@ -94,7 +102,8 @@
         "coverage": [
             "SR",
             "OM",
-            "PB"
+            "PB",
+            "SA"
         ]
     },
     {
@@ -102,7 +111,8 @@
         "code": "JAVA",
         "slots": 1,
         "coverage": [
-            "OM"
+            "OM",
+            "SM"
         ],
         "ignore": []
     },
@@ -111,11 +121,7 @@
         "code": "PYTHON",
         "slots": 1,
         "coverage": [
-            "OM",
-            "SS",
-            "SR",
-            "NP",
-            "SD"
+            "SR"
         ],
         "ignore": []
     },
@@ -126,7 +132,8 @@
         "coverage": [
             "SS",
             "NP",
-            "SR"
+            "SR",
+            "OM"
         ],
         "ignore": []
     },
@@ -135,7 +142,8 @@
         "code": "DEVOPS",
         "slots": 1,
         "coverage": [
-            "SS"
+            "SS",
+            "SR"
         ],
         "ignore": []
     },
@@ -144,7 +152,8 @@
         "code": "PSUDO",
         "slots": 1,
         "coverage": [
-            "OM"
+            "OM",
+            "SS"
         ],
         "ignore": []
     }
