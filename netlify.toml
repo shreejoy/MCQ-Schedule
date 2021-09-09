@@ -1,0 +1,14 @@
+[functions]
+directory = "functions"
+
+[[redirects]]
+from = "/screenshot/*"
+to = "/.netlify/functions/screenshot"
+status = 200
+force = true
+
+[[redirects]]
+from = "/webhook/*"
+to = "/.netlify/functions/webhook"
+status = 200
+force = true
