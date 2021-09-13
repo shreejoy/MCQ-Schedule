@@ -3,7 +3,7 @@ const TelegramBot = require('node-telegram-bot-api');
 exports.handler = async (event, context) => {
     const api_key = event.queryStringParameters.api_key;
 
-    if (api_key != process.env.api_key) {
+    if (api_key !== process.env.api_key) {
         return {
             statusCode: 403,
             headers: {
@@ -34,6 +34,7 @@ exports.handler = async (event, context) => {
 
     try {
         const sendPhoto = await bot.sendPhoto(process.env.chat_id, imageUrl, sendPhotoOptions);
+        // eslint-disable-next-line no-unused-vars
         const pinMessage = await bot.pinChatMessage(process.env.chat_id, sendPhoto.message_id);
         return {
             statusCode: 200,

@@ -1,6 +1,6 @@
 const chromium = require("chrome-aws-lambda");
 
-async function screenshot(component) {
+async function screenshot(url, component) {
     const browser = await chromium.puppeteer.launch({
         executablePath: await chromium.executablePath,
         args: chromium.args,
@@ -10,8 +10,8 @@ async function screenshot(component) {
     const page = await browser.newPage();
 
     page.setJavaScriptEnabled(true);
-    component = !component ? "#root" : component == 'table' ? 'table' : `#${component}`;
-    let response = await page.goto("https://mcq-schedule-cwc.netlify.app/", {
+    component = !component ? "#root" : component === 'table' ? 'table' : `#${component}`;
+    await page.goto(`https://${url}/`, {
         waitUntil: ["load", "networkidle0"],
         timeout: 8500,
     });
@@ -32,8 +32,8 @@ async function screenshot(component) {
 }
 
 exports.handler = async (event, context) => {
-    component = event.path.slice(12);
-    output = await screenshot(component);
+    const component = event.path.slice(12);
+    const output = await screenshot(event.headers.host, component);
     return {
         statusCode: 200,
         headers: {
