@@ -7,7 +7,7 @@ const Navigation = () => {
       <Navbar bg="dark" variant="dark">
         <Container>
           <Image
-            src="cwc_logo.png"
+            src="/cwc_logo.png"
             style={{ height: "50px", width: "50px" }}
             roundedCircle
           />
@@ -19,7 +19,7 @@ const Navigation = () => {
           <Nav.Link as={Link} to={"/"}>Home Page</Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link as={Link} to={"/post"}>Post Page</Nav.Link>
+          <Nav.Link as={Link} to={"/questions"}>Questions Page</Nav.Link>
         </Nav.Item>
       </Nav>
     </div>

@@ -2,6 +2,18 @@
 directory = "functions"
 
 [[redirects]]
+from = "/test/*"
+to = "/.netlify/functions/test"
+status = 200
+force = true
+
+[[redirects]]
+from = "/review/*"
+to = "/.netlify/functions/review"
+status = 200
+force = true
+
+[[redirects]]
 from = "/screenshot/*"
 to = "/.netlify/functions/screenshot"
 status = 200
@@ -16,6 +28,12 @@ force = true
 [[redirects]]
 from = "/login/*"
 to = "/.netlify/functions/login"
+status = 200
+force = true
+
+[[redirects]]
+from = "/MCQ/*"
+to = "/.netlify/functions/MCQ"
 status = 200
 force = true
 

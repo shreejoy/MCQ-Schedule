@@ -1,39 +1,12 @@
 const chromium = require("chrome-aws-lambda");
-
-async function screenshot(url, component) {
-    const browser = await chromium.puppeteer.launch({
-        executablePath: await chromium.executablePath,
-        args: chromium.args,
-        headless: chromium.headless,
-    });
-
-    const page = await browser.newPage();
-
-    page.setJavaScriptEnabled(true);
-    component = !component ? "#root" : component === 'table' ? 'table' : `#${component}`;
-    await page.goto(`https://${url}/`, {
-        waitUntil: ["load", "networkidle0"],
-        timeout: 8500,
-    });
-
-    await page.waitForSelector(component);
-    const element = await page.$(component);
-
-    let options = {
-        type: "png",
-        encoding: "base64",
-    };
-
-    let output = await element.screenshot(options);
-
-    await browser.close();
-
-    return output;
-}
+const capture = require("./utils/capture");
 
 exports.handler = async (event, context) => {
     const component = event.path.slice(12);
-    const output = await screenshot(event.headers.host, component);
+    const output = await capture(
+        new URL(event.rawUrl).origin,
+        !component ? "#root" : component === "table" ? "table" : `#${component}`
+    );
     return {
         statusCode: 200,
         headers: {
