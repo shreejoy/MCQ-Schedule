@@ -59,7 +59,7 @@ const validateMCQList = (query, headers) => {
 };
 
 const validateMCQQuestion = (query, headers) => {
-    const listSchema = {
+    const questionSchema = {
         query: Joi.object()
             .keys({
                 id: Joi.string().required(),
@@ -76,14 +76,38 @@ const validateMCQQuestion = (query, headers) => {
             }),
     };
 
-    return Joi.compile(listSchema).validate({
+    return Joi.compile(questionSchema).validate({
         query,
         headers,
     });
 };
 
+const validateMCQScreenshot = (body, headers) => {
+    const screenshotSchema = {
+        body: Joi.object()
+            .keys({
+                id: Joi.string().required(),
+            })
+            .options({
+                stripUnknown: true,
+            }),
+        headers: Joi.object()
+            .keys({
+                token: Joi.string(),
+            })
+            .options({
+                stripUnknown: true,
+            }),
+    };
+
+    return Joi.compile(screenshotSchema).validate({
+        body,
+        headers,
+    });
+};
+
 const validateMCQreview = (body, headers) => {
-    const listSchema = {
+    const reviewSchema = {
         body: Joi.object()
             .keys({
                 id: Joi.string().required(),
@@ -101,7 +125,7 @@ const validateMCQreview = (body, headers) => {
             }),
     };
 
-    return Joi.compile(listSchema).validate({
+    return Joi.compile(reviewSchema).validate({
         body,
         headers,
     });
@@ -111,5 +135,6 @@ module.exports = {
     validateMCQCreate,
     validateMCQList,
     validateMCQQuestion,
-    validateMCQreview
+    validateMCQreview,
+    validateMCQScreenshot
 };
