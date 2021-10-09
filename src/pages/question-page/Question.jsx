@@ -1,18 +1,12 @@
 import React from "react";
 import _ from "lodash";
 import moment from "moment";
-import {
-    Container,
-    Alert,
-    Placeholder,
-    Button,
-    ButtonGroup,
-} from "react-bootstrap";
+import { Container, Alert, Placeholder, Button, Modal } from "react-bootstrap";
 import Navigation from "../../components/Navbar";
 import { instanceOf } from "prop-types";
 import { withCookies, Cookies } from "react-cookie";
-import LoginButton from "../../components/LoginButton";
 import AlertLoginInfo from "../../components/post-page/AlertLoginInfo";
+import { connect } from "react-redux";
 
 const styles = {
     textarea: {
@@ -24,6 +18,18 @@ const styles = {
     },
 };
 
+const mapStateToProps = (state) => {
+    return { state };
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        dispatch: (action) => {
+            dispatch(action);
+        },
+    };
+};
+
 class Question extends React.Component {
     static propTypes = {
         cookies: instanceOf(Cookies).isRequired,
@@ -31,37 +37,24 @@ class Question extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            isLoggedIn: null,
-            contributor: {},
             data: {},
-            email: "",
+            showModal: false,
         };
     }
 
     componentDidMount() {
-        fetch("/data/contributors.json")
-            .then((resp) => resp.json())
-            .then((contributors) => this.setState({ contributors }));
-
         this.loadData = this.loadData.bind(this);
-        this.loginSuccess = this.loginSuccess.bind(this);
-        this.logoutSuccess = this.logoutSuccess.bind(this);
-        this.updateLoginStatus = this.updateLoginStatus.bind(this);
-        this.updateLoginStatus();
         this.loadData();
     }
 
+
     loadData() {
-        const id = this.props.location.pathname.split("/")[2] || "";
-        const token = this.props.cookies.get("tokenId");
-        const options = token
-            ? {
-                  headers: {
-                      token,
-                  },
-              }
-            : {};
-        // console.log(options, { isLoggedIn: this.state.isLoggedIn, token });
+        const id = this.props.match.params.id;
+        const options = _.set(
+            {},
+            "headers.token",
+            this.props.cookies.get("tokenId")
+        );
         fetch(`/MCQ/question?id=${id}`, options)
             .then((resp) => resp.json())
             .then((data) => {
@@ -74,63 +67,19 @@ class Question extends React.Component {
                             showAlert: true,
                             variant: "danger",
                             alertText:
-                                "Error: Requested question was not found. Please try again with correct ID.",
+                                "Error: Requested question was not found. Please try again with correct question ID.",
                         },
                     });
                 }
             });
     }
 
-    updateLoginStatus() {
-        const tokenId = this.props.cookies.get("tokenId") || "";
-
-        fetch("/login", {
-            method: "POST",
-            body: new URLSearchParams({ tokenId }).toString(),
-        })
-            .then((resp) => resp.json())
-            .then((data) => {
-                const { OK, contributor, email } = data;
-                if (OK) {
-                    this.loadData();
-                    this.setState({
-                        isLoggedIn: OK,
-                        contributor,
-                        email,
-                    });
-                } else {
-                    this.loadData();
-                    this.setState({ isLoggedIn: false });
-                }
-            })
-            .catch((err) => {
-                setTimeout(() => this.setState({ isLoggedIn: false }), 2000);
-            });
-    }
-
-    loginSuccess(data) {
-        const tokenId = data.tokenId;
-        const email = data.profileObj.email;
-
-        const isContributor = this.state.contributors.some(
-            (contributor) => contributor.email === email
-        );
-
-        // console.log({ isContributor, email });
-
-        if (isContributor) {
-            this.props.cookies.set("tokenId", tokenId, { path: "/" });
-            this.updateLoginStatus();
-        }
-    }
-
-    logoutSuccess() {
-        this.props.cookies.remove("tokenId", { path: "/" });
-        this.updateLoginStatus();
+    review(action) {
+        const id = this.props.match.params.id;
     }
 
     getContributorName(codeName) {
-        const find = this.state.contributors.find(
+        const find = this.props.state.contributors.find(
             (contributor) => contributor.code === codeName
         );
         return find ? find.name : "Anonymous";
@@ -140,30 +89,18 @@ class Question extends React.Component {
         return moment(timestamp).format("lll");
     }
 
+    reload() {
+        this.forceUpdate();
+    }
+
     render() {
         return (
             <>
                 <Navigation />
-                {this.state.isLoggedIn === true && (
-                    <AlertLoginInfo
-                        email={this.state.email}
-                        onSuccess={this.logoutSuccess}
-                    />
-                )}
+                <AlertLoginInfo post={this.loadData} />
                 <Container style={{ padding: "20px" }}>
-                    {this.state.isLoggedIn === false && (
-                        <Alert variant="info" style={{ marginBottom: "2rem" }}>
-                            Login with registered Google Account to access the
-                            internal tools.
-                            <div className="d-flex justify-content-end">
-                                <LoginButton
-                                    variant={"outline-info"}
-                                    onSuccess={this.loginSuccess}
-                                />
-                            </div>
-                        </Alert>
-                    )}
-                    {_.isEmpty(this.state.data) ? (
+                    {_.isEmpty(this.state.data) ||
+                    !this.props.state.contributors ? (
                         <>
                             <>
                                 <b>Question:</b>
@@ -175,40 +112,13 @@ class Question extends React.Component {
                             </>
                             <>
                                 <b>Options:</b>
-                                {[
-                                    "option_1_value",
-                                    "option_2_value",
-                                    "option_3_value",
-                                    "option_4_value",
-                                ].map((option, idx) =>
-                                    option.includes(
-                                        this.state.data.correct_option
-                                    ) ? (
-                                        <pre
-                                            key={idx}
-                                            style={{
-                                                color: "green",
-                                                ...styles.pre,
-                                            }}
-                                        >
-                                            <Placeholder
-                                                as="p"
-                                                animation="glow"
-                                            >
-                                                <Placeholder xs={12} />
-                                            </Placeholder>
-                                        </pre>
-                                    ) : (
-                                        <pre key={idx} style={styles.pre}>
-                                            <Placeholder
-                                                as="p"
-                                                animation="glow"
-                                            >
-                                                <Placeholder xs={12} />
-                                            </Placeholder>
-                                        </pre>
-                                    )
-                                )}
+                                {_.times(4, (id) => (
+                                    <pre key={id} style={styles.pre}>
+                                        <Placeholder as="p" animation="glow">
+                                            <Placeholder xs={12} />
+                                        </Placeholder>
+                                    </pre>
+                                ))}
                             </>
                         </>
                     ) : (
@@ -238,7 +148,7 @@ class Question extends React.Component {
                             {this.state.data.code && (
                                 <>
                                     <b>Code:</b>
-                                    <pre style={styles.pre}>
+                                    <pre style={{...styles.pre, whiteSpace: "no-wrap"}}>
                                         {this.state.data.code}
                                     </pre>
                                 </>
@@ -281,24 +191,65 @@ class Question extends React.Component {
                                     )
                                 )}
                             </>
+                            <Modal
+                                show={this.state.showModal}
+                                backdrop="static"
+                                onHide={() =>
+                                    this.setState({ showModal: false })
+                                }
+                            >
+                                <Modal.Header closeButton>
+                                    <Modal.Title>Are you Sure?</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
+                                    <Alert variant={"danger"}>
+                                        <b>Remember:</b> This is a permanent
+                                        irreversible action. Once DECLINED, you
+                                        will not be able to recover this
+                                        question. And once APPROVED, you will
+                                        not be able to edit this question.
+                                    </Alert>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    <Button
+                                        variant="secondary"
+                                        onClick={() =>
+                                            this.setState({ showModal: false })
+                                        }
+                                    >
+                                        Close
+                                    </Button>
+                                    <Button
+                                        variant="primary"
+                                        onClick={this.postMCQ}
+                                    >
+                                        Understood
+                                    </Button>
+                                </Modal.Footer>
+                            </Modal>
                             {!this.state.data.published &&
-                                this.state.isLoggedIn &&
-                                this.state.contributor.admin && (
-                                    <Alert show={true} variant="dark">
+                                this.props.state.auth &&
+                                this.props.state.user.admin && (
+                                    <Alert show={true} variant="warning">
                                         <p>
                                             The question is not published yet.
                                             Please use the below buttons to
                                             approve or decline.
                                         </p>
-                                        <div className="d-flex justify-content-end">
-                                            <ButtonGroup className="mb-2">
-                                                <Button variant="success">
-                                                    Approve
-                                                </Button>
-                                                <Button variant="danger">
-                                                    Decline
-                                                </Button>
-                                            </ButtonGroup>
+                                        <div>
+                                            <Button
+                                                variant="success"
+                                                onClick={() =>
+                                                    this.setState(() => ({
+                                                        showModal: true,
+                                                    }))
+                                                }
+                                            >
+                                                Approve
+                                            </Button>{" "}
+                                            <Button variant="danger">
+                                                Decline
+                                            </Button>
                                         </div>
                                     </Alert>
                                 )}
@@ -310,4 +261,7 @@ class Question extends React.Component {
     }
 }
 
-export default withCookies(Question);
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(withCookies(Question));

@@ -14,13 +14,13 @@ import {
 function App() {
     const dispatch = useDispatch();
     useEffect(() => {
-        fetch("data/timetable.json")
+        fetch("/data/timetable.json")
             .then((resp) => resp.json())
             .then((timetable) => dispatch(setTimetable(timetable)));
-        fetch("data/contributors.json")
+        fetch("/data/contributors.json")
             .then((resp) => resp.json())
             .then((contributors) => dispatch(setContributors(contributors)));
-        fetch("data/topics.json")
+        fetch("/data/topics.json")
             .then((resp) => resp.json())
             .then((topics) => dispatch(setTopics(topics)));
         return () => {};

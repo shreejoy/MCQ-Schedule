@@ -32,10 +32,7 @@ const themes = [
     "zenburn",
 ];
 
-const bucket = "gs://coding-wizards-club.appspot.com";
-
 module.exports = {
     param,
-    themes,
-    bucket,
+    themes
 };

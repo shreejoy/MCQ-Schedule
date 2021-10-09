@@ -9,11 +9,11 @@ import {
     InputGroup,
     FormControl,
 } from "react-bootstrap";
+import { connect } from "react-redux";
 import { instanceOf } from "prop-types";
 import { withCookies, Cookies } from "react-cookie";
+import { setUser } from "../../redux/actions/actions";
 import Navigation from "../../components/Navbar";
-import AlertLogin from "../../components/post-page/AlertLogin";
-import AlertLoading from "../../components/post-page/AlertLoading";
 import AlertLoginInfo from "../../components/post-page/AlertLoginInfo";
 
 const styles = {
@@ -26,6 +26,18 @@ const styles = {
     },
 };
 
+const mapStateToProps = (state) => {
+    return { state };
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        dispatch: (action) => {
+            dispatch(action);
+        },
+    };
+};
+
 class Post extends React.Component {
     static propTypes = {
         cookies: instanceOf(Cookies).isRequired,
@@ -33,30 +45,22 @@ class Post extends React.Component {
 
     constructor(props) {
         super(props);
+        this.props.dispatch(setUser({ Hello: "Hello" }));
         this.state = {
             validated: false,
             showModal: false,
             showAlert: false,
-            variant: "primary",
-            alertText: "",
-            isLoggedIn: null,
             data: {},
-            email: "",
-            contributors: {},
         };
     }
 
     componentDidMount() {
-        fetch("data/contributors.json")
-            .then((resp) => resp.json())
-            .then((contributors) => this.setState({ contributors }));
-
         this.handleSubmit = this.handleSubmit.bind(this);
         this.updateData = this.updateData.bind(this);
-        this.loginSuccess = this.loginSuccess.bind(this);
-        this.logoutSuccess = this.logoutSuccess.bind(this);
-        this.updateLoginStatus = this.updateLoginStatus.bind(this);
-        this.updateLoginStatus();
+    }
+
+    reload() {
+        this.forceUpdate();
     }
 
     handleSubmit(event) {
@@ -91,65 +95,12 @@ class Post extends React.Component {
         }));
     }
 
-    updateLoginStatus() {
-        const tokenId = this.props.cookies.get("tokenId") || "";
-
-        fetch("/login", {
-            method: "POST",
-            body: new URLSearchParams({ tokenId }).toString(),
-        })
-            .then((resp) => resp.json())
-            .then((data) => {
-                console.log(JSON.stringify(data));
-                if (data.OK) {
-                    this.setState({
-                        isLoggedIn: true,
-                        email: data.email,
-                    });
-                } else {
-                    this.setState({ isLoggedIn: false });
-                }
-            })
-            .catch((err) => {
-                setTimeout(() => this.setState({ isLoggedIn: false }), 2000);
-            });
-    }
-
-    loginSuccess(data) {
-        console.log("login done");
-        const tokenId = data.tokenId;
-        const email = data.profileObj.email;
-
-        const isContributor = this.state.contributors.some(
-            (contributor) => contributor.email === email
-        );
-
-        console.log({ isContributor, email });
-
-        if (isContributor) {
-            this.props.cookies.set("tokenId", tokenId, { path: "/" });
-            this.updateLoginStatus();
-        }
-    }
-
-    logoutSuccess() {
-        this.props.cookies.remove("tokenId", { path: "/" });
-        this.updateLoginStatus();
-    }
-
     render() {
-        return this.state.isLoggedIn == null ? (
-            <AlertLoading />
-        ) : !this.state.isLoggedIn ? (
-            <AlertLogin onSuccess={this.loginSuccess} />
-        ) : (
+        return (
             <>
                 <Navigation />
-                <AlertLoginInfo
-                    onSuccess={this.logoutSuccess}
-                    email={this.state.email}
-                />
-                <Container style={{ padding: "20px" }}>
+                <AlertLoginInfo />
+                {this.props.state.auth && <Container style={{ padding: "20px" }}>
                     <Alert
                         show={this.state.showAlert}
                         variant={this.state.variant}
@@ -357,10 +308,10 @@ class Post extends React.Component {
                             </Button>
                         </Modal.Footer>
                     </Modal>
-                </Container>
+                </Container>}
             </>
         );
     }
 }
 
-export default withCookies(Post);
+export default connect(mapStateToProps, mapDispatchToProps)(withCookies(Post));

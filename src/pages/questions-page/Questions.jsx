@@ -1,17 +1,17 @@
 import React from "react";
 import _ from "lodash";
 import moment from "moment";
-import { Container, Alert, Button, Card, Spinner } from "react-bootstrap";
+import { Container, Alert, Button, Card } from "react-bootstrap";
 import Navigation from "../../components/Navbar";
 
 import { instanceOf } from "prop-types";
 import { withCookies, Cookies } from "react-cookie";
-import { GoogleLogin } from "react-google-login";
 
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import AlertLoginInfo from "../../components/post-page/AlertLoginInfo";
 import CardPlaceholder from "../../components/questions-page/CardPlaceholder";
+import { connect } from "react-redux";
 
 const CustomCard = styled(Card)`
     margin-bottom: 1rem;
@@ -28,6 +28,18 @@ const Text = styled(Card.Text)`
     text-overflow: ellipsis;
 `;
 
+const mapStateToProps = (state) => {
+    return { state };
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        dispatch: (action) => {
+            dispatch(action);
+        },
+    };
+};
+
 class Questions extends React.Component {
     static propTypes = {
         cookies: instanceOf(Cookies).isRequired,
@@ -36,30 +48,16 @@ class Questions extends React.Component {
         super(props);
         this.state = {
             data: [],
-            isLoggedIn: null,
-            email: "",
             hasNextPage: false,
             isLoading: false,
             nextCursor: 0,
             showAlert: false,
-            variant: "primary",
-            alertText: "",
         };
     }
 
     componentDidMount() {
-        fetch("data/contributors.json")
-            .then((resp) => resp.json())
-            .then((contributors) => this.setState({ contributors }));
-
         this.loadData = this.loadData.bind(this);
-        this.loginSuccess = this.loginSuccess.bind(this);
-        this.logoutSuccess = this.logoutSuccess.bind(this);
-        this.updateLoginStatus = this.updateLoginStatus.bind(this);
-        this.updateLoginStatus();
         this.loadData();
-
-        // console.log(JSON.stringify(this.props));
 
         if (this.props.location.state) {
             const showAlert = Boolean(this.props.location.state.showAlert);
@@ -73,17 +71,14 @@ class Questions extends React.Component {
 
     loadData() {
         this.setState({ isLoading: true });
-        const token = this.props.cookies.get("tokenId");
         const url = !this.state.nextCursor
             ? "/MCQ/list"
             : `/MCQ/list?cursor=${this.state.nextCursor}`;
-        const options = token
-            ? {
-                  headers: {
-                      token,
-                  },
-              }
-            : {};
+        const options = _.set(
+            {},
+            "headers.token",
+            this.props.cookies.get("tokenId")
+        );
 
         fetch(url, options)
             .then((resp) => resp.json())
@@ -112,53 +107,8 @@ class Questions extends React.Component {
             });
     }
 
-    updateLoginStatus() {
-        const tokenId = this.props.cookies.get("tokenId") || "";
-
-        fetch("/login", {
-            method: "POST",
-            body: new URLSearchParams({ tokenId }).toString(),
-        })
-            .then((resp) => resp.json())
-            .then((data) => {
-                // console.log(JSON.stringify(data));
-                if (data.OK) {
-                    this.setState({
-                        isLoggedIn: true,
-                        email: data.email,
-                    });
-                } else {
-                    this.setState({ isLoggedIn: false });
-                }
-            })
-            .catch((err) => {
-                setTimeout(() => this.setState({ isLoggedIn: false }), 2000);
-            });
-    }
-
-    loginSuccess(data) {
-        const tokenId = data.tokenId;
-        const email = data.profileObj.email;
-
-        const isContributor = this.state.contributors.some(
-            (contributor) => contributor.email === email
-        );
-
-        // console.log({ isContributor, email });
-
-        if (isContributor) {
-            this.props.cookies.set("tokenId", tokenId, { path: "/" });
-            this.updateLoginStatus();
-        }
-    }
-
-    logoutSuccess() {
-        this.props.cookies.remove("tokenId", { path: "/" });
-        this.updateLoginStatus();
-    }
-
     getContributorName(codeName) {
-        const find = this.state.contributors.find(
+        const find = this.props.state.contributors.find(
             (contributor) => contributor.code === codeName
         );
         return find ? find.name : "Anonymous";
@@ -172,48 +122,10 @@ class Questions extends React.Component {
         return (
             <>
                 <Navigation />
-                {this.state.isLoggedIn === true && (
-                    <AlertLoginInfo
-                        onSuccess={this.logoutSuccess}
-                        email={this.state.email}
-                    />
-                )}
+                <AlertLoginInfo post={this.loadData} />
                 <Container style={{ padding: "20px" }}>
-                    {this.state.isLoggedIn === false && (
-                        <Alert variant="info" style={{ marginBottom: "2rem" }}>
-                            Login with registered Google Account to access the
-                            internal tools.
-                            <div className="d-flex justify-content-end">
-                                <GoogleLogin
-                                    clientId="310703059955-ocms672ir8c4emu5gar5v5f5je4srifh.apps.googleusercontent.com"
-                                    render={(renderProps) => (
-                                        <Button
-                                            variant="outline-info"
-                                            style={{ marginRight: "10px" }}
-                                            onClick={renderProps.onClick}
-                                            disabled={renderProps.disabled}
-                                        >
-                                            {renderProps.disabled ? (
-                                                <Spinner
-                                                    as="span"
-                                                    animation="grow"
-                                                    size="sm"
-                                                    role="status"
-                                                    aria-hidden="true"
-                                                />
-                                            ) : (
-                                                "Login"
-                                            )}
-                                        </Button>
-                                    )}
-                                    prompt={"select_account"}
-                                    onSuccess={this.loginSuccess}
-                                    cookiePolicy={"single_host_origin"}
-                                />
-                            </div>
-                        </Alert>
-                    )}
-                    {_.isEmpty(this.state.data) ? (
+                    {_.isEmpty(this.state.data) ||
+                    !this.props.state.contributors ? (
                         <>
                             {_.times(3, (id) => (
                                 <CardPlaceholder key={id} />
@@ -225,11 +137,15 @@ class Questions extends React.Component {
                                 show={this.state.showAlert}
                                 variant={this.state.variant}
                                 className="rounded-0"
+                                onClose={() =>
+                                    this.setState({ showAlert: false })
+                                }
+                                dismissible
                             >
                                 {this.state.alertText}
                             </Alert>
 
-                            {this.state.isLoggedIn && (
+                            {this.props.state.auth && (
                                 <div className="d-flex justify-content-center mb-3">
                                     <Button as={Link} to="/post">
                                         Post Question
@@ -238,7 +154,7 @@ class Questions extends React.Component {
                             )}
                             {this.state.data.map(
                                 (d) =>
-                                    (this.state.isLoggedIn || d.published) && (
+                                    (this.props.state.auth || d.published) && (
                                         <Link
                                             to={"/question/" + d.docId}
                                             key={d.docId}
@@ -293,4 +209,7 @@ class Questions extends React.Component {
     }
 }
 
-export default withCookies(Questions);
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(withCookies(Questions));

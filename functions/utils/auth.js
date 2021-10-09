@@ -27,7 +27,7 @@ const auth = async (idToken, rawUrl) => {
 
         return { OK: Boolean(contributor), email: payload.email, contributor };
     } catch (error) {
-        return { OK: false, ...error };
+        return { OK: false, error: "Invalid authorization token" };
     }
 };
 
