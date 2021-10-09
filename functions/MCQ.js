@@ -142,6 +142,7 @@ exports.handler = async (event, context) => {
             });
 
             if (response.length) {
+                body.OK = true;
                 body.response = response;
                 body.count = response.length;
                 const nextCursor = _.last(response).date;
@@ -155,6 +156,7 @@ exports.handler = async (event, context) => {
                     body.nextCursor = nextCursor;
                 } else body.nextPage = false;
             } else {
+                body.OK = false;
                 body.nextPage = false;
             }
 
@@ -330,6 +332,8 @@ exports.handler = async (event, context) => {
                         type: "quiz",
                     });
 
+                    await questionRef.update({ published: true });
+
                     return {
                         statusCode: 200,
                         headers: {
@@ -356,7 +360,7 @@ exports.handler = async (event, context) => {
                     };
                 }
             } else if (action === "reject") {
-                // await questionRef.delete();
+                await questionRef.delete();
                 return {
                     statusCode: 200,
                     headers: {

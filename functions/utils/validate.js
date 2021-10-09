@@ -6,8 +6,8 @@ const validateMCQCreate = (body, headers) => {
             .keys({
                 date: Joi.date().default(Date.now()),
                 question: Joi.string().required(),
-                code: Joi.string(),
-                explaination: Joi.string(),
+                code: Joi.string().optional(),
+                explaination: Joi.string().optional(),
                 option_1_value: Joi.string().required(),
                 option_2_value: Joi.string().required(),
                 option_3_value: Joi.string().required(),
@@ -15,6 +15,10 @@ const validateMCQCreate = (body, headers) => {
                 correct_option: Joi.string().required(),
                 published: Joi.boolean().default(false),
                 author: Joi.string().required(),
+                screenshot: Joi.string().when('code', {
+                    is: Joi.exist(),
+                    then: Joi.required(),
+                }),
             })
             .options({
                 stripUnknown: true,
@@ -82,30 +86,6 @@ const validateMCQQuestion = (query, headers) => {
     });
 };
 
-const validateMCQScreenshot = (body, headers) => {
-    const screenshotSchema = {
-        body: Joi.object()
-            .keys({
-                id: Joi.string().required(),
-            })
-            .options({
-                stripUnknown: true,
-            }),
-        headers: Joi.object()
-            .keys({
-                token: Joi.string(),
-            })
-            .options({
-                stripUnknown: true,
-            }),
-    };
-
-    return Joi.compile(screenshotSchema).validate({
-        body,
-        headers,
-    });
-};
-
 const validateMCQreview = (body, headers) => {
     const reviewSchema = {
         body: Joi.object()
@@ -136,5 +116,4 @@ module.exports = {
     validateMCQList,
     validateMCQQuestion,
     validateMCQreview,
-    validateMCQScreenshot
 };
