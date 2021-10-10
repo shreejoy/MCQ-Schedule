@@ -26,11 +26,39 @@ const bot = new telegram(
 exports.handler = async (event, context) => {
     const path = event.path;
     const httpMethod = event.httpMethod;
+    const rawUrl = new URL(event.rawUrl).origin;
+    const { value: headers, error } = validate.validateHeaders(event.headers);
+
+    if (error && httpMethod === "POST") {
+        return {
+            statusCode: 401,
+            headers: {
+                "content-type": `application/json`,
+            },
+            body: JSON.stringify({ error, OK: false, message: "Unauthorized" }),
+            isBase64Encoded: false,
+        };
+    }
+
+    const authentication = await auth(headers.token, rawUrl);
+    if (!authentication.OK && httpMethod === "POST") {
+        return {
+            statusCode: 400,
+            headers: {
+                "content-type": `application/json`,
+            },
+            body: JSON.stringify({
+                ...authentication,
+                OK: false,
+                code: 2,
+            }),
+            isBase64Encoded: false,
+        };
+    }
 
     if (path.startsWith("/MCQ/create") && httpMethod === "POST") {
-        const { value, error } = validate.validateMCQCreate(
-            Object.fromEntries(new URLSearchParams(event.body)),
-            event.headers
+        const { value: body, error } = validate.validateMCQCreate(
+            Object.fromEntries(new URLSearchParams(event.body))
         );
 
         if (error) {
@@ -39,25 +67,7 @@ exports.handler = async (event, context) => {
                 headers: {
                     "content-type": `application/json`,
                 },
-                body: JSON.stringify({ error, OK: false, code: 1 }),
-                isBase64Encoded: false,
-            };
-        }
-
-        const { body, headers } = value;
-        const rawUrl = new URL(event.rawUrl).origin;
-        const authentication = await auth(headers.token, rawUrl);
-        if (!authentication.OK) {
-            return {
-                statusCode: 400,
-                headers: {
-                    "content-type": `application/json`,
-                },
-                body: JSON.stringify({
-                    ...authentication,
-                    OK: false,
-                    code: 2,
-                }),
+                body: JSON.stringify({ error, OK: false }),
                 isBase64Encoded: false,
             };
         }
@@ -90,9 +100,8 @@ exports.handler = async (event, context) => {
             };
         }
     } else if (path.startsWith("/MCQ/list") && httpMethod === "GET") {
-        const { value, error } = validate.validateMCQList(
-            Object.fromEntries(new URLSearchParams(event.rawQuery)),
-            event.headers
+        const { value: query, error } = validate.validateMCQList(
+            Object.fromEntries(new URLSearchParams(event.rawQuery))
         );
 
         if (error) {
@@ -101,20 +110,16 @@ exports.handler = async (event, context) => {
                 headers: {
                     "content-type": `application/json`,
                 },
-                body: JSON.stringify({ error, OK: false, code: 1 }),
+                body: JSON.stringify({ error, OK: false }),
                 isBase64Encoded: false,
             };
         }
-
-        const { query, headers } = value;
-        const cursor = parseInt(query.cursor);
-        const rawUrl = new URL(event.rawUrl).origin;
-        const authentication = await auth(headers.token, rawUrl);
 
         try {
             var questions,
                 response = [],
                 body = {};
+            const cursor = parseInt(query.cursor);
             const collection = database.collection("questions");
 
             if (cursor) {
@@ -183,9 +188,8 @@ exports.handler = async (event, context) => {
             };
         }
     } else if (path.startsWith("/MCQ/question") && httpMethod === "GET") {
-        const { value, error } = validate.validateMCQQuestion(
-            Object.fromEntries(new URLSearchParams(event.rawQuery)),
-            event.headers
+        const { value: query, error } = validate.validateMCQQuestion(
+            Object.fromEntries(new URLSearchParams(event.rawQuery))
         );
 
         if (error) {
@@ -194,17 +198,14 @@ exports.handler = async (event, context) => {
                 headers: {
                     "content-type": `application/json`,
                 },
-                body: JSON.stringify({ error, OK: false, code: 1 }),
+                body: JSON.stringify({ error, OK: false }),
                 isBase64Encoded: false,
             };
         }
 
-        const { query, headers } = value;
-        const rawUrl = new URL(event.rawUrl).origin;
-        const authentication = await auth(headers.token, rawUrl);
-        const docId = query.id;
-
+        
         try {
+            const docId = query.id;
             const collection = database.collection("questions");
             const question = await collection.doc(docId).get();
             if (!question.exists) throw Error("Question not found");
@@ -244,9 +245,8 @@ exports.handler = async (event, context) => {
             };
         }
     } else if (path.startsWith("/MCQ/review") && httpMethod === "POST") {
-        const { value, error } = validate.validateMCQreview(
-            Object.fromEntries(new URLSearchParams(event.body)),
-            event.headers
+        const { value: body, error } = validate.validateMCQreview(
+            Object.fromEntries(new URLSearchParams(event.body))
         );
 
         if (error) {
@@ -260,25 +260,7 @@ exports.handler = async (event, context) => {
             };
         }
 
-        const { body, headers } = value;
-        const rawUrl = new URL(event.rawUrl).origin;
-        const authentication = await auth(headers.token, rawUrl);
-
-        if (!authentication.OK) {
-            return {
-                statusCode: 400,
-                headers: {
-                    "content-type": `application/json`,
-                },
-                body: JSON.stringify({
-                    ...authentication,
-                    OK: false,
-                    code: 2,
-                }),
-                isBase64Encoded: false,
-            };
-        }
-
+        
         try {
             const { id, action } = body;
             const collection = database.collection("questions");
@@ -288,9 +270,9 @@ exports.handler = async (event, context) => {
                 throw new Error("Question does not exist");
             }
 
-            // if (questionDoc.data().published) {
-            //     throw new Error("Question is already published");
-            // }
+            if (questionDoc.data().published) {
+                throw new Error("Question is already published");
+            }
 
             if (action === "approve") {
                 const {
