@@ -75,7 +75,7 @@ class Question extends React.Component {
     }
 
     review(action) {
-        const id = this.props.match.params.id;
+        //const id = this.props.match.params.id;
     }
 
     getContributorName(codeName) {

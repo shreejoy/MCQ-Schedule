@@ -8,12 +8,11 @@ import {
     Container,
     InputGroup,
     FormControl,
+    Spinner,
 } from "react-bootstrap";
-import select from "../../themes";
 import { connect } from "react-redux";
 import { instanceOf } from "prop-types";
 import { withCookies, Cookies } from "react-cookie";
-import { setUser } from "../../redux/actions/actions";
 import Navigation from "../../components/Navbar";
 import AlertLoginInfo from "../../components/post-page/AlertLoginInfo";
 
@@ -46,11 +45,11 @@ class Post extends React.Component {
 
     constructor(props) {
         super(props);
-        this.props.dispatch(setUser({ Hello: "Hello" }));
         this.state = {
             validated: false,
             showModal: false,
             showAlert: false,
+            confirmed: false,
             data: {},
         };
     }
@@ -58,12 +57,12 @@ class Post extends React.Component {
     componentDidMount() {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.updateData = this.updateData.bind(this);
+        this.postMCQ = this.postMCQ.bind(this);
     }
 
     handleSubmit(event) {
         event.preventDefault();
         event.stopPropagation();
-        this.addScreenshot();
 
         if (event.currentTarget.checkValidity() !== false) {
             this.setState(() => ({ showModal: true }));
@@ -72,88 +71,56 @@ class Post extends React.Component {
         this.setState(() => ({ validated: true }));
     }
 
-    addScreenshot() {
-        console.log("add ss");
-        if (this.state.data.code) {
-            const theme = select();
-            const code = window.btoa(this.state.data.code);
-            const url = `https://ray.so?code=${code}`;
-            console.log(url);
-            // fetch("https://shot.screenshotapi.net/screenshot", {
-            //     method: "POST",
-            //     headers: {
-            //         "Content-Type": "application/json",
-            //     },
-            //     body: JSON.stringify({
-            //         url: encodeURIComponent(
-            //             `https://carbon.now.sh/?t=${theme}&code=${code}`
-            //         ),
-            //         output: "json",
-            //         file_type: "png",
-            //         block_ads: "true",
-            //         no_cookie_banners: "true",
-            //         wait_for_event: "load",
-            //         selector: ".export-container",
-            //     }),
-            // })
-            //     .then((resp) => resp.json())
-            //     .then((data) => {
-            //         if (!data.error) {
-            //             console.log(data);
-            //             this.setState(() => ({
-            //                 data: {
-            //                     ...this.state.data,
-            //                     screenshot: data.screenshot,
-            //                 },
-            //             }));
-            //         }
-            //     })
-            //     .catch((err) => {
-            //         console.log(err);
-            //     });
-        }
-    }
-
     postMCQ() {
-        fetch("", {
+        this.setState({
+            confirmed: true,
+        });
+        const token = this.props.cookies.get("tokenId");
+        fetch("/MCQ/create", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                token,
             },
-            body: JSON.stringify({
-                url: "https://carbon.now.sh/",
-                output: "json",
-                file_type: "png",
-                block_ads: "true",
-                no_cookie_banners: "true",
-                destroy_screenshot: "true",
-                wait_for_event: "load",
-                selector: ".export-container",
-            }),
-        })
-            .then((resp) => resp.json())
-            .then((data) => {
-                if (data.OK) {
-                }
-            });
-
-        fetch("#", {
-            method: "POST",
             body: new URLSearchParams(this.state.data).toString(),
         })
             .then((resp) => resp.json())
             .then((data) => {
                 if (data.OK) {
+                    this.setState({
+                        confirmed: false,
+                        showModal: false,
+                        showAlert: true,
+                        variantAlert: "success",
+                        textAlert:
+                            "Question is submitted successfully and is ready for review. Redirecting to preview in 5secs...",
+                    });
+                    setTimeout(() => {
+                        this.props.history.push(`/question/${data.docId}`);
+                    }, 5000);
+                } else {
+                    this.setState({
+                        confirmed: false,
+                        showModal: false,
+                        showAlert: true,
+                        variantAlert: "danger",
+                        textAlert: `Question is submission failed with Error: ${data.error}`,
+                    });
                 }
-            });
+            }).catch((err) => {
+                console.log(err.json())
+                this.setState({
+                    confirmed: false,
+                    showModal: false,
+                    showAlert: true,
+                    variantAlert: "danger",
+                    textAlert: `Question is submission failed with Error: ${err.message}`,
+                });
+            })
     }
 
     updateData(e) {
         this.setState(() => ({
-            data: {
-                ...this.state.data,
-                [e.target.name]: e.target.value,
-            },
+            data: { ...this.state.data, [e.target.name]: e.target.value },
         }));
     }
 
@@ -166,10 +133,10 @@ class Post extends React.Component {
                     <Container style={{ padding: "20px" }}>
                         <Alert
                             show={this.state.showAlert}
-                            variant={this.state.variant}
+                            variant={this.state.variantAlert}
                             className="rounded-0"
                         >
-                            {this.state.alertText}
+                            {this.state.textAlert}
                         </Alert>
                         <Form
                             noValidate
@@ -202,6 +169,46 @@ class Post extends React.Component {
                                     rows={3}
                                 />
                             </Form.Group>
+                            {this.state.data.code && (
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Code Language</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        name="language"
+                                        defaultValue="."
+                                        onChange={this.updateData}
+                                        isValid={Boolean(
+                                            this.state.data.language
+                                        )}
+                                        required={Boolean(this.state.data.code)}
+                                    >
+                                        <option></option>
+                                        {[
+                                            "c",
+                                            "css",
+                                            "cpp",
+                                            "go",
+                                            "html",
+                                            "java",
+                                            "javascript",
+                                            "jsx",
+                                            "php",
+                                            "python",
+                                            "rust",
+                                            "typescript",
+                                        ].map((language, idx) => (
+                                            <option key={idx}>
+                                                {language}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
+                                    <Form.Control.Feedback type="invalid">
+                                        Please provide a correct langauge for
+                                        above code.
+                                    </Form.Control.Feedback>
+                                </Form.Group>
+                            )}
+
                             <Form.Group className="mb-3">
                                 <Form.Label>Explaination</Form.Label>
                                 <Form.Control
@@ -312,7 +319,10 @@ class Post extends React.Component {
                                 </>
                                 {this.state.data.code && (
                                     <>
-                                        <b>Code:</b>
+                                        <b>
+                                            Code: (Language:{" "}
+                                            {this.state.data.language})
+                                        </b>
                                         <pre style={styles.pre}>
                                             {this.state.data.code}
                                         </pre>
@@ -372,7 +382,17 @@ class Post extends React.Component {
                                     variant="primary"
                                     onClick={this.postMCQ}
                                 >
-                                    Understood
+                                    {this.state.confirmed ? (
+                                        <Spinner
+                                            as="span"
+                                            animation="grow"
+                                            size="sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                        />
+                                    ) : (
+                                        "Understood"
+                                    )}
                                 </Button>
                             </Modal.Footer>
                         </Modal>

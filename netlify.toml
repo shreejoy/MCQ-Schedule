@@ -38,6 +38,12 @@ status = 200
 force = true
 
 [[redirects]]
+from = "/code2img/*"
+to = "/.netlify/functions/code2img"
+status = 200
+force = true
+
+[[redirects]]
 from = "/*"
 to = "/"
 status = 200

@@ -1,7 +1,7 @@
 import { ActionTypes } from "../constants/actionconstants";
 let default_state = {
-    auth: false,
-    user: null,
+    auth: true,
+    user: {u:1},
     contributors: null,
     timetable: null,
     topics: null,
