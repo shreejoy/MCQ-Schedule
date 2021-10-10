@@ -5,6 +5,7 @@
   "dependencies": {
     "bootstrap": "^5.1.0",
     "chrome-aws-lambda": "^10.1.0",
+    "firebase": "^9.1.2",
     "firebase-admin": "^9.11.1",
     "google-auth-library": "^7.9.1",
     "joi": "^17.4.2",
