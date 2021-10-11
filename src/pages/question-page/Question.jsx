@@ -1,7 +1,14 @@
 import React from "react";
 import _ from "lodash";
 import moment from "moment";
-import { Container, Alert, Placeholder, Button, Modal } from "react-bootstrap";
+import {
+    Container,
+    Alert,
+    Placeholder,
+    Button,
+    Modal,
+    Badge,
+} from "react-bootstrap";
 import Navigation from "../../components/Navbar";
 import { instanceOf } from "prop-types";
 import { withCookies, Cookies } from "react-cookie";
@@ -38,15 +45,16 @@ class Question extends React.Component {
         super(props);
         this.state = {
             data: {},
+            confirmed: false,
             showModal: false,
         };
     }
 
     componentDidMount() {
+        this.review = this.review.bind(this);
         this.loadData = this.loadData.bind(this);
         this.loadData();
     }
-
 
     loadData() {
         const id = this.props.match.params.id;
@@ -74,8 +82,29 @@ class Question extends React.Component {
             });
     }
 
-    review(action) {
-        //const id = this.props.match.params.id;
+    review() {
+        this.setState({ confirmed: true });
+        const token = this.props.cookies.get("tokenId");
+        const {
+            action,
+            data: { docId: id },
+        } = this.state;
+
+        fetch("/MCQ/review", {
+            method: "POST",
+            headers: {
+                token,
+            },
+            body: new URLSearchParams({ action, id }).toString(),
+        })
+            .then((resp) => resp.json())
+            .then((data) => {
+                if (data.OK) {
+                    if (action === "approve") {
+                        
+                    }
+                }
+            });
     }
 
     getContributorName(codeName) {
@@ -87,10 +116,6 @@ class Question extends React.Component {
 
     timestampToDate(timestamp) {
         return moment(timestamp).format("lll");
-    }
-
-    reload() {
-        this.forceUpdate();
     }
 
     render() {
@@ -134,9 +159,7 @@ class Question extends React.Component {
                             <>
                                 <b>Date {"&"} TIme:</b>
                                 <pre style={styles.pre}>
-                                    {this.timestampToDate(
-                                        this.state.data.timestamp
-                                    )}
+                                    {this.timestampToDate(this.state.data.date)}
                                 </pre>
                             </>
                             <>
@@ -147,8 +170,16 @@ class Question extends React.Component {
                             </>
                             {this.state.data.code && (
                                 <>
-                                    <b>Code:</b>
-                                    <pre style={{...styles.pre, whiteSpace: "no-wrap"}}>
+                                    <b>
+                                        Code: (Language:{" "}
+                                        {this.state.data.language})
+                                    </b>
+                                    <pre
+                                        style={{
+                                            ...styles.pre,
+                                            whiteSpace: "no-wrap",
+                                        }}
+                                    >
                                         {this.state.data.code}
                                     </pre>
                                 </>
@@ -168,28 +199,19 @@ class Question extends React.Component {
                                     "option_2_value",
                                     "option_3_value",
                                     "option_4_value",
-                                ].map((option, idx) =>
-                                    option.includes(
-                                        this.state.data.correct_option
-                                    ) ? (
-                                        <pre
-                                            key={idx}
-                                            style={{
-                                                color: "green",
-                                                ...styles.pre,
-                                            }}
-                                        >
-                                            {idx + 1} {" > "}{" "}
-                                            {this.state.data[option]}{" "}
-                                            <b>{"(correct)"}</b>
-                                        </pre>
-                                    ) : (
-                                        <pre key={idx} style={styles.pre}>
-                                            {idx + 1} {" > "}{" "}
-                                            {this.state.data[option]}
-                                        </pre>
-                                    )
-                                )}
+                                ].map((option, idx) => (
+                                    <pre key={idx} style={styles.pre}>
+                                        {idx + 1} {">"}{" "}
+                                        {this.state.data[option]}{" "}
+                                        {option.includes(
+                                            this.state.data.correct_option
+                                        ) && (
+                                            <Badge pill bg="success">
+                                                correct
+                                            </Badge>
+                                        )}
+                                    </pre>
+                                ))}
                             </>
                             <Modal
                                 show={this.state.showModal}
@@ -198,16 +220,14 @@ class Question extends React.Component {
                                     this.setState({ showModal: false })
                                 }
                             >
-                                <Modal.Header closeButton>
+                                <Modal.Header>
                                     <Modal.Title>Are you Sure?</Modal.Title>
                                 </Modal.Header>
                                 <Modal.Body>
                                     <Alert variant={"danger"}>
                                         <b>Remember:</b> This is a permanent
-                                        irreversible action. Once DECLINED, you
-                                        will not be able to recover this
-                                        question. And once APPROVED, you will
-                                        not be able to edit this question.
+                                        irreversible action.{" "}
+                                        {this.state.modalText}
                                     </Alert>
                                 </Modal.Body>
                                 <Modal.Footer>
@@ -221,7 +241,7 @@ class Question extends React.Component {
                                     </Button>
                                     <Button
                                         variant="primary"
-                                        onClick={this.postMCQ}
+                                        onClick={this.reviewMCQ}
                                     >
                                         Understood
                                     </Button>
@@ -240,14 +260,27 @@ class Question extends React.Component {
                                             <Button
                                                 variant="success"
                                                 onClick={() =>
-                                                    this.setState(() => ({
+                                                    this.setState({
                                                         showModal: true,
-                                                    }))
+                                                        modalText:
+                                                            "Once APPROVED, you will not be able to edit this question.",
+                                                        action: "approve",
+                                                    })
                                                 }
                                             >
                                                 Approve
                                             </Button>{" "}
-                                            <Button variant="danger">
+                                            <Button
+                                                variant="danger"
+                                                onClick={() =>
+                                                    this.setState({
+                                                        showModal: true,
+                                                        modalText:
+                                                            "Once DECLINED, you will not be able to recover this question.",
+                                                        action: "decline",
+                                                    })
+                                                }
+                                            >
                                                 Decline
                                             </Button>
                                         </div>

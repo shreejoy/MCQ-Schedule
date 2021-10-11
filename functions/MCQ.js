@@ -1,9 +1,9 @@
 const _ = require("lodash");
+const fetch = require("node-fetch");
 const auth = require("./utils/auth");
 
 const validate = require("./utils/validate");
 const telegram = require("node-telegram-bot-api");
-
 const firebase = require("firebase-admin");
 
 const serviceAccount = JSON.parse(
@@ -57,6 +57,7 @@ exports.handler = async (event, context) => {
     }
 
     if (path.startsWith("/MCQ/create") && httpMethod === "POST") {
+        console.log(event.body)
         const { value: body, error } = validate.validateMCQCreate(
             Object.fromEntries(new URLSearchParams(event.body))
         );
@@ -67,14 +68,39 @@ exports.handler = async (event, context) => {
                 headers: {
                     "content-type": `application/json`,
                 },
-                body: JSON.stringify({ error, OK: false }),
+                body: JSON.stringify({
+                    error: _.map(error.details, "message"),
+                    OK: false,
+                }),
                 isBase64Encoded: false,
             };
         }
 
         try {
+            body.author = authentication.contributor.code;
             const collection = database.collection("questions");
             const question = collection.doc();
+
+            if (body.code) {
+                const query = new URLSearchParams({
+                    id: question.id,
+                    language: body.language,
+                    key: process.env.api_key,
+                }).toString();
+
+                const code2img = await fetch(`${rawUrl}/code2img?${query}`, {
+                    method: "POST",
+                    body: body.code,
+                });
+
+                const response = await code2img.json();
+
+                if (response.OK) {
+                    body.screenshot = response.screenshot;
+                } else
+                    throw Error("Error fetching screenshot, Try again later.");
+            }
+
             await question.set(body);
 
             return {
@@ -82,7 +108,7 @@ exports.handler = async (event, context) => {
                 headers: {
                     "content-type": `application/json`,
                 },
-                body: JSON.stringify({ OK: true, ...body }),
+                body: JSON.stringify({ OK: true, docId: question.id, ...body }),
                 isBase64Encoded: false,
             };
         } catch (error) {
@@ -100,6 +126,7 @@ exports.handler = async (event, context) => {
             };
         }
     } else if (path.startsWith("/MCQ/list") && httpMethod === "GET") {
+        const allowed = authentication.OK ? [true, false] : [true];
         const { value: query, error } = validate.validateMCQList(
             Object.fromEntries(new URLSearchParams(event.rawQuery))
         );
@@ -124,12 +151,14 @@ exports.handler = async (event, context) => {
 
             if (cursor) {
                 questions = await collection
+                    .where("published", "in", allowed)
                     .orderBy("date", "desc")
                     .startAfter(cursor)
                     .limit(10)
                     .get();
             } else {
                 questions = await collection
+                    .where("published", "in", allowed)
                     .orderBy("date", "desc")
                     .limit(10)
                     .get();
@@ -152,6 +181,7 @@ exports.handler = async (event, context) => {
                 body.count = response.length;
                 const nextCursor = _.last(response).date;
                 const nextQuestion = await collection
+                    .where("published", "in", allowed)
                     .orderBy("date", "desc")
                     .startAfter(nextCursor)
                     .limit(1)
@@ -203,7 +233,6 @@ exports.handler = async (event, context) => {
             };
         }
 
-        
         try {
             const docId = query.id;
             const collection = database.collection("questions");
@@ -260,7 +289,6 @@ exports.handler = async (event, context) => {
             };
         }
 
-        
         try {
             const { id, action } = body;
             const collection = database.collection("questions");

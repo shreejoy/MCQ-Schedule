@@ -21,13 +21,11 @@ const mapDispatchToProps = (dispatch) => {
 class AlertLoginInfo extends React.Component {
     constructor(props) {
         super(props);
-        this.updateLoginStatus = this.updateLoginStatus.bind(this);
         this.loginSuccess = this.loginSuccess.bind(this);
         this.logoutSuccess = this.logoutSuccess.bind(this);
+        this.updateLoginStatus = this.updateLoginStatus.bind(this);
+        this.props.cookies.addChangeListener(() => window.location.reload());
         this.updateLoginStatus();
-        this.props.cookies.addChangeListener(() => {
-          window.location.reload();
-        });
     }
     updateLoginStatus() {
         const tokenId = this.props.cookies.get("tokenId") || "";

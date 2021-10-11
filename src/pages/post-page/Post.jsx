@@ -9,6 +9,7 @@ import {
     InputGroup,
     FormControl,
     Spinner,
+    Badge,
 } from "react-bootstrap";
 import { connect } from "react-redux";
 import { instanceOf } from "prop-types";
@@ -98,6 +99,7 @@ class Post extends React.Component {
                         this.props.history.push(`/question/${data.docId}`);
                     }, 5000);
                 } else {
+                    console.log(JSON.stringify(data));
                     this.setState({
                         confirmed: false,
                         showModal: false,
@@ -106,8 +108,8 @@ class Post extends React.Component {
                         textAlert: `Question is submission failed with Error: ${data.error}`,
                     });
                 }
-            }).catch((err) => {
-                console.log(err.json())
+            })
+            .catch((err) => {
                 this.setState({
                     confirmed: false,
                     showModal: false,
@@ -115,7 +117,7 @@ class Post extends React.Component {
                     variantAlert: "danger",
                     textAlert: `Question is submission failed with Error: ${err.message}`,
                 });
-            })
+            });
     }
 
     updateData(e) {
@@ -300,7 +302,7 @@ class Post extends React.Component {
                             fullscreen={true}
                             onHide={() => this.setState({ showModal: false })}
                         >
-                            <Modal.Header closeButton>
+                            <Modal.Header>
                                 <Modal.Title>Are you Sure?</Modal.Title>
                             </Modal.Header>
                             <Modal.Body>
@@ -344,40 +346,29 @@ class Post extends React.Component {
                                         "option_3_value",
                                         "option_4_value",
                                     ].map((option, idx) => (
-                                        <pre
-                                            key={idx}
-                                            style={
-                                                !option.includes(
-                                                    this.state.data
-                                                        .correct_option
-                                                )
-                                                    ? styles.pre
-                                                    : {
-                                                          color: "green",
-                                                          ...styles.pre,
-                                                      }
-                                            }
-                                        >
-                                            <b>
-                                                {option.split("_")[1]} {">"}
-                                            </b>{" "}
+                                        <pre key={idx} style={styles.pre}>
+                                            {idx + 1} {">"}{" "}
                                             {this.state.data[option]}{" "}
                                             {option.includes(
                                                 this.state.data.correct_option
-                                            ) && <b>{"(correct)"}</b>}
+                                            ) && (
+                                                <Badge pill bg="success">
+                                                    correct
+                                                </Badge>
+                                            )}
                                         </pre>
                                     ))}
                                 </>
                             </Modal.Body>
                             <Modal.Footer>
-                                <Button
+                                {!this.state.confirmed && <Button
                                     variant="secondary"
                                     onClick={() =>
                                         this.setState({ showModal: false })
                                     }
                                 >
                                     Close
-                                </Button>
+                                </Button>}
                                 <Button
                                     variant="primary"
                                     onClick={this.postMCQ}

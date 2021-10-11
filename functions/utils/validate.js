@@ -18,6 +18,10 @@ const validateMCQCreate = (body) => {
             date: Joi.date().default(Date.now()),
             question: Joi.string().required(),
             code: Joi.string().optional(),
+            language: Joi.string().when('code', {
+                is: Joi.exist(),
+                then: Joi.required(),
+            }),
             explaination: Joi.string().optional(),
             option_1_value: Joi.string().required(),
             option_2_value: Joi.string().required(),
@@ -25,7 +29,7 @@ const validateMCQCreate = (body) => {
             option_4_value: Joi.string().required(),
             correct_option: Joi.string().required(),
             published: Joi.boolean().default(false),
-            author: Joi.string().required(),
+            author: Joi.string().optional(),
         })
         .options({
             stripUnknown: true,

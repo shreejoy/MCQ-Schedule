@@ -45,8 +45,8 @@ const theme = sample([
 ]);
 
 exports.handler = async (event, context) => {
+    const name = event.queryStringParameters.id;
     const language = event.queryStringParameters.language;
-    const name = Date.now().toString();
 
     if (!event.body || !language) {
         return {
@@ -59,24 +59,28 @@ exports.handler = async (event, context) => {
         };
     }
 
-    const response = await fetch(
-        `https://code2img.vercel.app/api/to-image?language=${language}&theme=${theme}&padding=0`,
-        {
-            method: "POST",
-            body: event.body,
-        }
-    );
-
-    const image = await response.buffer();
     const file = bucket.file(`${name}.png`);
+    const [exists] = await file.exists();
+    console.log(`file ${name}.png exists: ${exists}`);
 
-    await file.save(image, {
-        public: true,
-        resumable: false,
-        metadata: {
-            contentType: "image/png",
-        },
-    });
+    if (!exists) {
+        const response = await fetch(
+            `https://code2img.vercel.app/api/to-image?language=${language}&theme=${theme}&padding=0`,
+            {
+                method: "POST",
+                body: event.body,
+            }
+        );
+
+        const image = await response.buffer();
+        await file.save(image, {
+            public: true,
+            resumable: false,
+            metadata: {
+                contentType: "image/png",
+            },
+        });
+    }
 
     return {
         statusCode: 200,

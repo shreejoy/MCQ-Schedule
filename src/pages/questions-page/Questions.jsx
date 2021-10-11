@@ -83,13 +83,13 @@ class Questions extends React.Component {
         fetch(url, options)
             .then((resp) => resp.json())
             .then((data) => {
-                const { OK, response, nextPage } = data;
+                const { OK, response, nextPage, nextCursor } = data;
                 if (OK) {
                     const cdata = this.state.data;
                     this.setState({ data: [...cdata, ...response] });
-                    if (nextPage > 0) {
+                    if (nextPage) {
                         this.setState({
-                            nextCursor: nextPage,
+                            nextCursor,
                             hasNextPage: true,
                             isLoading: false,
                         });
